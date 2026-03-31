@@ -6,9 +6,9 @@ import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import Iter "mo:core/Iter";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   module Prediction {
     public type Timestamp = Int;

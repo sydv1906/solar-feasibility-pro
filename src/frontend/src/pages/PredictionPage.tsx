@@ -141,11 +141,18 @@ export function PredictionPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
+  const [suggestions, setSuggestions] = useState<
+    { lat: string; lon: string; display_name: string }[]
+  >([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Initialise Leaflet map
   useEffect(() => {
     if (!mapRef.current || leafletMapRef.current) return;
-    import("leaflet").then((L) => {
+    const L = (window as any).L;
+    if (!L) return;
+    {
       // Fix default marker icons
       (L.Icon.Default.prototype as any)._getIconUrl = undefined;
       L.Icon.Default.mergeOptions({
@@ -170,10 +177,24 @@ export function PredictionPage() {
         setLat(Math.round(clickLat * 10000) / 10000);
         setLon(Math.round(clickLon * 10000) / 10000);
         marker.setLatLng([clickLat, clickLon]);
+        fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${clickLat}&lon=${clickLon}&format=json`,
+        )
+          .then((r) => r.json())
+          .then((data) => {
+            const name =
+              data?.address?.city ||
+              data?.address?.town ||
+              data?.address?.village ||
+              data?.display_name?.split(",")[0] ||
+              "";
+            if (name) setCityInput(name);
+          })
+          .catch(() => {});
       });
 
       leafletMapRef.current = map;
-    });
+    }
 
     return () => {
       if (leafletMapRef.current) {
@@ -189,6 +210,39 @@ export function PredictionPage() {
       markerRef.current.setLatLng([newLat, newLon]);
       leafletMapRef.current.setView([newLat, newLon], 10);
     }
+  }, []);
+
+  // Debounced autocomplete
+  useEffect(() => {
+    if (cityInput.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityInput)}&format=json&limit=5&addressdetails=1`,
+        );
+        const data = await res.json();
+        setSuggestions(data);
+        setShowSuggestions(data.length > 0);
+      } catch {
+        /* ignore */
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [cityInput]);
+
+  // Click-outside to close suggestions
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // City geocoding
@@ -212,6 +266,22 @@ export function PredictionPage() {
     } catch {
       setError("Geocoding failed. Check your connection.");
     }
+  }
+
+  // Suggestion click handler
+  function handleSuggestionClick(suggestion: {
+    lat: string;
+    lon: string;
+    display_name: string;
+  }) {
+    const newLat = Number.parseFloat(suggestion.lat);
+    const newLon = Number.parseFloat(suggestion.lon);
+    setLat(Math.round(newLat * 10000) / 10000);
+    setLon(Math.round(newLon * 10000) / 10000);
+    updateMarker(newLat, newLon);
+    setCityInput(suggestion.display_name.split(",")[0]);
+    setSuggestions([]);
+    setShowSuggestions(false);
   }
 
   // Browser geolocation
@@ -506,24 +576,48 @@ export function PredictionPage() {
                 <MapPin className="w-4 h-4 text-solar-yellow" /> Select Location
               </h2>
               {/* City search */}
-              <div className="flex gap-2 mb-3">
-                <input
-                  type="text"
-                  value={cityInput}
-                  onChange={(e) => setCityInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleCitySearch()}
-                  placeholder="Enter city name..."
-                  data-ocid="prediction.search_input"
-                  className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-solar-yellow text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={handleCitySearch}
-                  data-ocid="prediction.search.button"
-                  className="flex items-center gap-1.5 bg-solar-yellow hover:bg-solar-orange text-slate-900 font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors"
-                >
-                  <Search className="w-4 h-4" /> Search
-                </button>
+              <div className="relative mb-3" ref={searchRef}>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={cityInput}
+                    onChange={(e) => {
+                      setCityInput(e.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && handleCitySearch()}
+                    onFocus={() =>
+                      suggestions.length > 0 && setShowSuggestions(true)
+                    }
+                    placeholder="Enter city name..."
+                    data-ocid="prediction.search_input"
+                    className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-solar-yellow text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCitySearch}
+                    data-ocid="prediction.search.button"
+                    className="flex items-center gap-1.5 bg-solar-yellow hover:bg-solar-orange text-slate-900 font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors"
+                  >
+                    <Search className="w-4 h-4" /> Search
+                  </button>
+                </div>
+                {/* Autocomplete dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute left-0 right-12 top-full mt-1 bg-slate-800 border border-slate-600 rounded-xl shadow-2xl z-50 overflow-hidden">
+                    {suggestions.map((s) => (
+                      <button
+                        type="button"
+                        key={s.display_name}
+                        onClick={() => handleSuggestionClick(s)}
+                        className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-slate-700 transition-colors border-b border-slate-700/50 last:border-0 flex items-center gap-2"
+                      >
+                        <MapPin className="w-3.5 h-3.5 text-solar-yellow flex-shrink-0" />
+                        <span className="truncate">{s.display_name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               {/* Map container */}
               <div
@@ -532,7 +626,7 @@ export function PredictionPage() {
                 className="w-full rounded-xl overflow-hidden border border-slate-700"
               />
               <p className="text-xs text-slate-500 mt-2">
-                Click on the map to select location
+                Click on the map to select location, or search by city above
               </p>
             </div>
 

@@ -1,0 +1,29 @@
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background-color: #0b1120;
+    color: #f1f5f9;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+}
+
+@layer components {
+  .solar-card {
+    background: rgba(22, 32, 53, 0.9);
+    border: 1px solid rgba(45, 55, 80, 0.5);
+    backdrop-filter: blur(8px);
+  }
+
+  .solar-navy {
+    background: #0b1120;
+  }
+}

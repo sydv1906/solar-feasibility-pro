@@ -1,6 +1,9 @@
 import {
   ArrowRight,
+  BadgeIndianRupee,
   BarChart3,
+  CheckCircle,
+  ExternalLink,
   Globe,
   MapPin,
   Shield,
@@ -117,6 +120,267 @@ export function HomePage({ onStart }: HomePageProps) {
               title="Prediction History"
               description="Track and compare all your previous analyses in a detailed history table for informed decisions."
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Government Subsidies Section */}
+      <section className="bg-gradient-to-br from-[#0B2A1A] via-[#0A2A1F] to-[#0B1F0E] py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-green-400/10 border border-green-400/30 rounded-full px-4 py-1.5 mb-4">
+              <BadgeIndianRupee className="w-4 h-4 text-green-400" />
+              <span className="text-green-400 text-sm font-medium">
+                Government Initiative
+              </span>
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              Solar Subsidies by{" "}
+              <span className="text-green-400">Government of India</span>
+            </h2>
+            <p className="text-[#A8C7B0] text-lg max-w-3xl mx-auto">
+              The Indian government offers significant financial assistance for
+              rooftop solar installations under the{" "}
+              <span className="text-green-300 font-semibold">
+                PM Surya Ghar Muft Bijli Yojana
+              </span>{" "}
+              scheme, launched in 2024.
+            </p>
+          </div>
+
+          {/* Main Scheme Banner */}
+          <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 border border-green-500/30 rounded-2xl p-6 mb-10">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
+              <div className="w-16 h-16 bg-green-400/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <Sun className="w-8 h-8 text-green-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-white mb-1">
+                  PM Surya Ghar: Muft Bijli Yojana
+                </h3>
+                <p className="text-[#A8C7B0] text-sm mb-3">
+                  Launched February 2024 | Target: 1 crore households | Budget:
+                  ₹75,021 crore
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {[
+                    "Up to 300 units FREE electricity/month",
+                    "Subsidy up to ₹78,000",
+                    "1 crore homes targeted",
+                    "Grid-connected rooftop systems",
+                  ].map((badge) => (
+                    <span
+                      key={badge}
+                      className="flex items-center gap-1.5 bg-green-400/10 border border-green-400/20 text-green-300 text-xs px-3 py-1.5 rounded-full"
+                    >
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      {badge}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <a
+                href="https://pmsuryaghar.gov.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors flex-shrink-0"
+              >
+                Apply Now <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+
+          {/* Subsidy Rate Table + State subsidies */}
+          <div className="grid lg:grid-cols-2 gap-8 mb-10">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <h3 className="text-white font-semibold text-lg mb-4 flex items-center gap-2">
+                <BadgeIndianRupee className="w-5 h-5 text-green-400" />
+                Central Financial Assistance (CFA) Rates
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="text-left py-2.5 text-[#A8C7B0] font-medium">
+                        System Capacity
+                      </th>
+                      <th className="text-left py-2.5 text-[#A8C7B0] font-medium">
+                        CFA per kW
+                      </th>
+                      <th className="text-left py-2.5 text-[#A8C7B0] font-medium">
+                        Max Subsidy
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {[
+                      {
+                        capacity: "Up to 2 kW",
+                        rate: "₹30,000/kW",
+                        max: "₹60,000",
+                      },
+                      {
+                        capacity: "2 kW – 3 kW",
+                        rate: "₹18,000/kW",
+                        max: "₹78,000",
+                      },
+                      {
+                        capacity: "3 kW – 10 kW",
+                        rate: "₹9,000/kW",
+                        max: "₹1,35,000",
+                      },
+                      {
+                        capacity: "Above 10 kW",
+                        rate: "Not applicable",
+                        max: "—",
+                      },
+                    ].map((row) => (
+                      <tr key={row.capacity}>
+                        <td className="py-3 text-white font-medium">
+                          {row.capacity}
+                        </td>
+                        <td className="py-3 text-green-300">{row.rate}</td>
+                        <td className="py-3 text-yellow-300 font-semibold">
+                          {row.max}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-[#A8C7B0] mt-4">
+                * For residential (household) grid-connected rooftop solar
+                systems only. Additional state-level subsidies may apply.
+              </p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <h3 className="text-white font-semibold text-lg mb-4 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-400" />
+                State-wise Additional Subsidies
+              </h3>
+              <div className="space-y-2.5">
+                {[
+                  {
+                    state: "Gujarat",
+                    subsidy: "Up to ₹10,000 additional",
+                    color: "text-blue-300",
+                  },
+                  {
+                    state: "Rajasthan",
+                    subsidy: "Up to ₹15,000 additional",
+                    color: "text-purple-300",
+                  },
+                  {
+                    state: "Maharashtra",
+                    subsidy: "Up to ₹12,000 additional",
+                    color: "text-pink-300",
+                  },
+                  {
+                    state: "Uttar Pradesh",
+                    subsidy: "Special incentive + net metering",
+                    color: "text-orange-300",
+                  },
+                  {
+                    state: "Madhya Pradesh",
+                    subsidy: "Up to ₹10,000 additional",
+                    color: "text-green-300",
+                  },
+                  {
+                    state: "Tamil Nadu",
+                    subsidy: "Additional ₹20,000 for BPL households",
+                    color: "text-cyan-300",
+                  },
+                  {
+                    state: "Karnataka",
+                    subsidy: "Net metering + accelerated depreciation",
+                    color: "text-red-300",
+                  },
+                  {
+                    state: "Delhi",
+                    subsidy: "Generation-based incentive ₹2/kWh",
+                    color: "text-amber-300",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.state}
+                    className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
+                  >
+                    <span className="text-white text-sm font-medium">
+                      {item.state}
+                    </span>
+                    <span className={`text-xs ${item.color}`}>
+                      {item.subsidy}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-[#A8C7B0] mt-4">
+                * State subsidies vary. Check with your state DISCOM.
+              </p>
+            </div>
+          </div>
+
+          {/* How to Apply */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+            <h3 className="text-white font-semibold text-lg mb-6 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              How to Apply for PM Surya Ghar Subsidy
+            </h3>
+            <div className="grid md:grid-cols-4 gap-4">
+              {[
+                {
+                  step: "1",
+                  title: "Register Online",
+                  desc: "Visit pmsuryaghar.gov.in and register with your electricity consumer number and Aadhaar.",
+                },
+                {
+                  step: "2",
+                  title: "Choose Installer",
+                  desc: "Select a MNRE-empanelled vendor from the portal for your area.",
+                },
+                {
+                  step: "3",
+                  title: "Installation",
+                  desc: "The vendor installs the system and applies for net meter with your DISCOM.",
+                },
+                {
+                  step: "4",
+                  title: "Get Subsidy",
+                  desc: "After net meter installation, the CFA amount is directly credited to your bank account.",
+                },
+              ].map((item) => (
+                <div key={item.step} className="text-center">
+                  <div className="w-10 h-10 bg-green-500/20 border border-green-500/40 rounded-full flex items-center justify-center text-green-400 font-bold text-lg mx-auto mb-3">
+                    {item.step}
+                  </div>
+                  <h4 className="text-white font-semibold text-sm mb-1">
+                    {item.title}
+                  </h4>
+                  <p className="text-[#A8C7B0] text-xs leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-[#A8C7B0] text-sm">
+                Helpline:{" "}
+                <span className="text-white font-medium">1800-180-3333</span>{" "}
+                (Toll Free) | Email:{" "}
+                <span className="text-white font-medium">
+                  support@pmsuryaghar.gov.in
+                </span>
+              </p>
+              <a
+                href="https://pmsuryaghar.gov.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 border border-green-500/50 text-green-400 hover:bg-green-500/10 font-medium px-4 py-2 rounded-xl text-sm transition-colors"
+              >
+                Official Website <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
           </div>
         </div>
       </section>

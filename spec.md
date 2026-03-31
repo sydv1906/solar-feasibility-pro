@@ -1,50 +1,46 @@
-# Solar Power Prediction System
+# Solar Feasibility Pro
 
 ## Current State
-The app has:
-- HomePage: Landing hero section
-- PredictionPage: Sliders for Temperature, Irradiance, Humidity → linear regression predicts kW feasibility
-- DashboardPage: 4 tabs (Analytics, Insights, History, ML Info) with charts and on-chain history
-- Backend: Stores prediction records with fields: locationName, lat/lon, temperature, irradiance, humidity, powerOutput, feasibilityStatus, feasibilityScore, confidenceScore
+A full-stack solar prediction app deployed on Caffeine (Internet Computer / Motoko backend). It has:
+- **HomePage**: Hero, feature cards, CTA section, footer
+- **PredictionPage**: Leaflet map (clickable), city search (button), lat/lon inputs, auto-detect, Open-Meteo weather integration, ML prediction, daily/weekly/monthly/yearly analysis tabs
+- **DashboardPage**: Analytics, insights, history, ML info, dataset tabs — history stored in IC canister
+- All prediction/history logic goes through `useActor` → Motoko canister
+
+When downloaded and run locally on Windows, the app crashes because `CANISTER_ID_BACKEND is not set` — there's no Internet Computer running locally.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Interactive Leaflet map on PredictionPage for click-to-select location (auto-fills lat/lon)
-- Manual lat/lon input fields + city name geocoding (Nominatim API, free)
-- Browser geolocation auto-detect button
-- Solar system capacity input (kW)
-- Open-Meteo API integration to fetch live weather: temperature, humidity, cloud cover, precipitation, shortwave radiation
-- Solar angle calculation (zenith, azimuth) from lat/lon + time using astronomical formulas
-- ML prediction using linear regression weights derived from the real dataset (Temperature, Humidity, Cloud Cover, Shortwave Radiation, Zenith, Azimuth, Capacity → generated power in Wh)
-- Analysis tabs on PredictionPage: Daily / Weekly / Monthly / Yearly — charts appear only when tab is clicked
-  - Daily: today's hourly output (line chart)
-  - Weekly: next 7 days bar chart
-  - Monthly: 30-day aggregated bar chart
-  - Yearly: 12-month area chart
-- Smart insights section: "Highest generation on X day", "Cloud cover reduced efficiency by X%", "Best time: 11am–2pm", "Estimated efficiency: X%"
-- Dataset section (new tab in Dashboard): shows real embedded CSV data in a scrollable table + distribution charts
-- Update backend to store new fields: solarCapacity, cloudCover, precipitation, zenith, azimuth, generatedPower (Wh)
+- `local-project/` directory: complete standalone Python Flask + React project that runs on Windows without any Internet Computer dependency
+  - `backend/app.py`: Flask REST API (GET/POST/DELETE history, health check), stores data in `history.json`
+  - `backend/requirements.txt`: Only `flask` and `flask-cors` (Windows-native)
+  - `frontend/`: React + Vite + Tailwind app — identical design, no `@dfinity/*` dependencies, calls Flask API for history
+  - `README.md`: Windows step-by-step setup instructions
+- **Prediction page**: Autocomplete dropdown — as user types a city name, show live suggestions from Nominatim API (debounced 400ms), clicking a suggestion moves the map marker and fills the lat/lon fields
+- **Homepage**: New "Government of India Solar Subsidies" section showing PM Surya Ghar Muft Bijli Yojana, central financial assistance rates (table), state-wise subsidies, and how to apply
 
 ### Modify
-- PredictionPage: completely replaced with new location-aware prediction UI
-- Backend: updated Prediction record type to include new fields
-- DashboardPage: add Dataset tab alongside existing Analytics/Insights/History/ML Info tabs
+- `local-project/frontend/src/pages/PredictionPage.tsx`: Remove `FeasibilityStatus` import and `useActor` calls; replace with `fetch('http://localhost:5000/api/history', ...)` POST when prediction is saved
+- `local-project/frontend/src/pages/DashboardPage.tsx`: Remove `Record_` import and `useActor`; replace history calls with Flask API; fix timestamp (Flask uses ms int, not IC nanoseconds BigInt)
+- `src/frontend/src/pages/PredictionPage.tsx` (Caffeine): Add autocomplete suggestions dropdown
+- `src/frontend/src/pages/HomePage.tsx` (Caffeine): Add subsidies section
 
 ### Remove
-- Old slider-based prediction form (Temperature/Irradiance/Humidity sliders only)
-- Old simple feasibility scoring based on sliders
+- All `@dfinity/*` imports from local-project frontend
+- `useActor` hook usage from local-project pages
+- IC canister config from local-project (no `env.json`, no `config.ts`, no IC-specific vite env plugin)
 
 ## Implementation Plan
-1. Update Motoko backend to store richer prediction records (solarCapacity, cloudCover, precipitation, zenith, azimuth, generatedPower)
-2. Embed real dataset rows (extracted from user screenshots) as a JS array in the frontend
-3. Derive linear regression weights from the dataset for the ML model
-4. Build new PredictionPage:
-   a. Location section: Leaflet map (clickable) + manual lat/lon fields + city geocoding + auto-detect button
-   b. Capacity input (kW)
-   c. "Predict" button with loading spinner
-   d. Result cards: Daily / Weekly / Monthly / Yearly output
-   e. Analysis tabs with charts (Recharts): Line, Bar, Bar, Area
-   f. Insights cards
-5. Add Dataset tab to Dashboard showing table + charts of embedded CSV data
-6. Keep existing History, ML Info, Analytics tabs
+1. Write `spec.md` (this file)
+2. Create `local-project/backend/app.py` — Flask with CORS, JSON file storage
+3. Create `local-project/backend/requirements.txt`
+4. Create `local-project/README.md` with Windows setup guide
+5. Create all `local-project/frontend/` config files (package.json, vite.config.ts, tailwind.config.js, tsconfig.json, postcss.config.js, index.html)
+6. Create `local-project/frontend/src/` files: main.tsx, App.tsx, index.css, lib/utils.ts, components/Navbar.tsx, data/solarDataset.ts, utils/prediction.ts
+7. Create `local-project/frontend/src/pages/HomePage.tsx` — same as Caffeine version + subsidies section
+8. Create `local-project/frontend/src/pages/PredictionPage.tsx` — same logic + autocomplete + Flask API save
+9. Create `local-project/frontend/src/pages/DashboardPage.tsx` — same UI + Flask API history
+10. Update `src/frontend/src/pages/PredictionPage.tsx` (Caffeine) — add autocomplete dropdown
+11. Update `src/frontend/src/pages/HomePage.tsx` (Caffeine) — add subsidies section
+12. Validate and deploy Caffeine app
